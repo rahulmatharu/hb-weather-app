@@ -14,13 +14,27 @@ const Weather = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
 
   useEffect(() => {
-    fetchWeatherData();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          fetchWeatherData(latitude, longitude);
+        },
+        (error) => {
+          //   console.log("Geolocation not supported or permission denied");
+          console.error(`Error getting user location: ${error}`);
+          // TODO: add error handling on front end
+        }
+      );
+    } else {
+      console.log("Geolocation not supported");
+    }
   }, []);
 
-  const fetchWeatherData = async () => {
+  const fetchWeatherData = async (lat: number, long: number) => {
     try {
       const response = await axios.get(
-        "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
       );
       const currentWeather = response.data.current;
       const units = response.data.current_units;
@@ -33,7 +47,7 @@ const Weather = () => {
       });
       //console.log(JSON.stringify(response));
     } catch (error) {
-      console.log(`API call to Open Mateo failed with error ${error}`);
+      console.log(`Error calling Open Mateo weather API: ${error}`);
       // TODO: Add proper error handling and display error on front end
     }
   };
