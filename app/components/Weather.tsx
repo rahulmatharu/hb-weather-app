@@ -10,24 +10,34 @@ type WeatherData = {
   windUnit: string;
 };
 
+type Location = {
+  latitude: number;
+  longitude: number;
+};
+
 const Weather = () => {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weather, setWeather] = useState<WeatherData>();
+  const [error, setError] = useState<string>();
+  const [location, setLocation] = useState<Location>();
 
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          setLocation(position.coords);
           fetchWeatherData(latitude, longitude);
         },
         (error) => {
-          //   console.log("Geolocation not supported or permission denied");
+          setError(
+            "Geolocation not supported or permission denied. Please enable location permission or refresh page."
+          );
           console.error(`Error getting user location: ${error}`);
-          // TODO: add error handling on front end
         }
       );
     } else {
-      console.log("Geolocation not supported");
+      console.error(`Error getting user location`);
+      setError("Geolocation not supported");
     }
   }, []);
 
@@ -45,10 +55,9 @@ const Weather = () => {
         wind: currentWeather.wind_speed_10m,
         windUnit: units.wind_speed_10m,
       });
-      //console.log(JSON.stringify(response));
     } catch (error) {
       console.log(`Error calling Open Mateo weather API: ${error}`);
-      // TODO: Add proper error handling and display error on front end
+      setError("Service unavailable at this time. Please try again later.");
     }
   };
 
@@ -64,6 +73,12 @@ const Weather = () => {
             Wind Speed: {weather.wind} {weather.windUnit}
           </p>
         </div>
+      )}
+      {error && <p>Error: {error}</p>}
+      {location && (
+        <p>
+          Location: {location.latitude}, {location.longitude}
+        </p>
       )}
     </div>
   );
