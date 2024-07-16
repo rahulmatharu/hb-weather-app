@@ -4,6 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import mapping from "./wmoWeatherCodes.json";
+import { format } from "date-fns-tz";
 
 type WeatherCodes =
   | 0
@@ -36,6 +37,7 @@ type WeatherCodes =
   | 99;
 
 type WeatherData = {
+  time: Date;
   temp: number;
   tempUnit: string;
   wind: number;
@@ -85,6 +87,7 @@ const Weather = () => {
       const units = response.data.current_units;
       console.log(response.data);
       setWeather({
+        time: new Date(currentWeather.time),
         temp: currentWeather.temperature_2m,
         tempUnit: units.temperature_2m,
         wind: currentWeather.wind_speed_10m,
@@ -111,35 +114,51 @@ const Weather = () => {
       />
       {/* Current Weather */}
       <div className="flex flex-col gap-6 p-8 m-w-3xl md:space-x-6">
-        <div className="relative flex justify-between items-center">
-          <p>Weather Component</p>
-        </div>
         {weather && (
-          <div>
-            <Image
-              src={
-                mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
-                  .image
-              }
-              width={100}
-              height={100}
-              alt="Clear Sky"
-              className=""
-            />
+          <div className="flex flex-col">
+            <div className="flex flex-row items-center">
+              <Image
+                src={
+                  mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
+                    .image
+                }
+                width={100}
+                height={100}
+                alt="Clear Sky"
+                className=""
+              />
+              <div className="flex flex-row flex-grow font-bold ">
+                <h1 className="text-5xl">{weather.temp}</h1>
+                <h3 className="pl-2 text-xl">{weather.tempUnit}</h3>
+              </div>
+              <div className="flex flex-col mr-10">
+                <p className="font-bold">Weather</p>
+                <p className=" text-sm">
+                  {format(weather.time.toUTCString(), "EEEE HH:mm")}
+                </p>
+
+                <p className="text-sm">
+                  {
+                    mapping[weather.weatherCode][
+                      weather.isDay ? "day" : "night"
+                    ].description
+                  }
+                </p>
+              </div>
+            </div>
+
             <p>
               {
                 mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
                   .description
               }
             </p>
-            <p>
-              Temperature: {weather.temp} {weather.tempUnit}
-            </p>
+
             <p>
               Wind Speed: {weather.wind} {weather.windUnit}
             </p>
-            <p>isDay: {weather.isDay.toString()}</p>
             <p>code: {weather.weatherCode}</p>
+            <p>time: {format(weather.time.toUTCString(), "EEEE HH:mm")}</p>
           </div>
         )}
         {error && <p>Error: {error}</p>}
