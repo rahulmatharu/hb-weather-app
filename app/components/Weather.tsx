@@ -2,12 +2,46 @@
 
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import mapping from "./wmoWeatherCodes.json";
+
+type WeatherCodes =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 45
+  | 48
+  | 51
+  | 53
+  | 55
+  | 56
+  | 57
+  | 61
+  | 63
+  | 65
+  | 66
+  | 67
+  | 71
+  | 73
+  | 75
+  | 77
+  | 80
+  | 81
+  | 82
+  | 85
+  | 86
+  | 95
+  | 96
+  | 99;
 
 type WeatherData = {
   temp: number;
   tempUnit: string;
   wind: number;
   windUnit: string;
+  isDay: boolean;
+  weatherCode: WeatherCodes;
 };
 
 type Location = {
@@ -55,6 +89,8 @@ const Weather = () => {
         tempUnit: units.temperature_2m,
         wind: currentWeather.wind_speed_10m,
         windUnit: units.wind_speed_10m,
+        isDay: currentWeather.is_day ? true : false,
+        weatherCode: currentWeather.weather_code,
       });
     } catch (error) {
       console.log(`Error calling Open Mateo weather API: ${error}`);
@@ -64,22 +100,57 @@ const Weather = () => {
 
   return (
     <div>
-      <p>Weather Component</p>
-      {weather && (
-        <div>
-          <p>
-            Temperature: {weather.temp} {weather.tempUnit}
-          </p>
-          <p>
-            Wind Speed: {weather.wind} {weather.windUnit}
-          </p>
+      {/* Overlay */}
+      <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 z-[-1]" />
+      {/* Background */}
+      <Image
+        src="/clear-sky.avif"
+        alt="Clear Sky"
+        layout="fill"
+        className="absolute w-full h-full object-cover object-top z-[-2]"
+      />
+      {/* Current Weather */}
+      <div className="flex flex-col gap-6 p-8 m-w-3xl md:space-x-6">
+        <div className="relative flex justify-between items-center">
+          <p>Weather Component</p>
         </div>
-      )}
-      {error && <p>Error: {error}</p>}
+        {weather && (
+          <div>
+            <Image
+              src={
+                mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
+                  .image
+              }
+              width={100}
+              height={100}
+              alt="Clear Sky"
+              className=""
+            />
+            <p>
+              {
+                mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
+                  .description
+              }
+            </p>
+            <p>
+              Temperature: {weather.temp} {weather.tempUnit}
+            </p>
+            <p>
+              Wind Speed: {weather.wind} {weather.windUnit}
+            </p>
+            <p>isDay: {weather.isDay.toString()}</p>
+            <p>code: {weather.weatherCode}</p>
+          </div>
+        )}
+        {error && <p>Error: {error}</p>}
+      </div>
+
+      {/* Location Coordinates */}
       {location && (
-        <p>
-          Location: {location.latitude}, {location.longitude}
-        </p>
+        <div className="fixed bottom-0 right-0 mr-2 text-sm text-gray-300">
+          Lat: {location.latitude.toFixed(6)}, Long:{" "}
+          {location.longitude.toFixed(6)}
+        </div>
       )}
     </div>
   );
