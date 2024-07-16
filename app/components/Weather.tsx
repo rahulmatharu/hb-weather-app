@@ -44,8 +44,9 @@ const Weather = () => {
   const fetchWeatherData = async (lat: number, long: number) => {
     try {
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,wind_speed_10m,is_day,weather_code`
       );
+
       const currentWeather = response.data.current;
       const units = response.data.current_units;
       console.log(response.data);
