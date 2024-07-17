@@ -5,54 +5,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import mapping from "./wmoWeatherCodes.json";
 import { format } from "date-fns-tz";
-
-type WeatherCodes =
-  | 0
-  | 1
-  | 2
-  | 3
-  | 45
-  | 48
-  | 51
-  | 53
-  | 55
-  | 56
-  | 57
-  | 61
-  | 63
-  | 65
-  | 66
-  | 67
-  | 71
-  | 73
-  | 75
-  | 77
-  | 80
-  | 81
-  | 82
-  | 85
-  | 86
-  | 95
-  | 96
-  | 99;
-
-type WeatherData = {
-  time: Date;
-  temp: number;
-  tempUnit: string;
-  wind: number;
-  windUnit: string;
-  isDay: boolean;
-  weatherCode: WeatherCodes;
-};
-
-type Location = {
-  latitude: number;
-  longitude: number;
-};
+import { CurrentWeatherType, WeatherDetails, WeatherHighlights } from "./types";
+import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import WavesIcon from "@mui/icons-material/Waves";
+import AirIcon from "@mui/icons-material/Air";
+import NavigationIcon from "@mui/icons-material/Navigation";
 
 const Weather = () => {
-  const [weather, setWeather] = useState<WeatherData>();
+  const [weather, setWeather] = useState<WeatherHighlights>();
+  const [weatherDetails, setWeatherDetails] = useState<WeatherDetails[]>([]);
   const [error, setError] = useState<string>();
   const [location, setLocation] = useState<Location>();
 
@@ -61,6 +22,7 @@ const Weather = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          //TODO: fix type error
           setLocation(position.coords);
           fetchWeatherData(latitude, longitude);
         },
@@ -80,21 +42,53 @@ const Weather = () => {
   const fetchWeatherData = async (lat: number, long: number) => {
     try {
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,wind_speed_10m,is_day,weather_code`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m`
       );
 
-      const currentWeather = response.data.current;
+      const currentWeather: CurrentWeatherType = response.data.current;
       const units = response.data.current_units;
       console.log(response.data);
       setWeather({
         time: new Date(currentWeather.time),
         temp: currentWeather.temperature_2m,
         tempUnit: units.temperature_2m,
-        wind: currentWeather.wind_speed_10m,
-        windUnit: units.wind_speed_10m,
         isDay: currentWeather.is_day ? true : false,
         weatherCode: currentWeather.weather_code,
+        description:
+          mapping[currentWeather.weather_code][
+            currentWeather.is_day ? "day" : "night"
+          ].description,
+        icon: mapping[currentWeather.weather_code][
+          currentWeather.is_day ? "day" : "night"
+        ].icon,
       });
+
+      setWeatherDetails([
+        {
+          type: "Wind Speed",
+          unit: units.wind_speed_10m,
+          value: currentWeather.wind_speed_10m,
+          icon: AirIcon,
+        },
+        {
+          type: "Humidity",
+          unit: units.relative_humidity_2m,
+          value: currentWeather.relative_humidity_2m,
+          icon: WavesIcon,
+        },
+        {
+          type: "Precipitation",
+          unit: units.precipitation,
+          value: currentWeather.precipitation,
+          icon: WaterDropIcon,
+        },
+        {
+          type: "Wind Direction",
+          unit: units.wind_direction_10m,
+          value: currentWeather.wind_direction_10m,
+          icon: NavigationIcon,
+        },
+      ]);
     } catch (error) {
       console.log(`Error calling Open Mateo weather API: ${error}`);
       setError("Service unavailable at this time. Please try again later.");
@@ -118,10 +112,7 @@ const Weather = () => {
           <div className="flex flex-col">
             <div className="flex flex-row items-center">
               <Image
-                src={
-                  mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
-                    .image
-                }
+                src={weather.icon}
                 width={100}
                 height={100}
                 alt="Clear Sky"
@@ -135,15 +126,10 @@ const Weather = () => {
                 <p className="font-bold">Weather</p>
                 <p className=" text-sm">
                   {format(weather.time.toUTCString(), "EEEE HH:mm")}
+                  {/* TODO: fix bug with time not taking into account daylight savings */}
                 </p>
 
-                <p className="text-sm">
-                  {
-                    mapping[weather.weatherCode][
-                      weather.isDay ? "day" : "night"
-                    ].description
-                  }
-                </p>
+                <p className="text-sm">{weather.description}</p>
               </div>
             </div>
 
@@ -154,9 +140,7 @@ const Weather = () => {
               }
             </p>
 
-            <p>
-              Wind Speed: {weather.wind} {weather.windUnit}
-            </p>
+            <p>{JSON.stringify(weatherDetails)}</p>
             <p>code: {weather.weatherCode}</p>
             <p>time: {format(weather.time.toUTCString(), "EEEE HH:mm")}</p>
           </div>
