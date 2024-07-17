@@ -1,4 +1,3 @@
-import React from "react";
 import { SvgIconComponent } from "@mui/icons-material";
 
 export type WeatherCodes =
@@ -45,7 +44,7 @@ export type WeatherDetails = {
   type: string;
   unit?: string;
   value: number;
-  icon: SvgIconComponent;
+  icon: React.ReactNode;
 };
 
 export type Location = {

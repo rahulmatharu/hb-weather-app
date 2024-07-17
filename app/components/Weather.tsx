@@ -10,6 +10,7 @@ import WaterDropIcon from "@mui/icons-material/WaterDrop";
 import WavesIcon from "@mui/icons-material/Waves";
 import AirIcon from "@mui/icons-material/Air";
 import NavigationIcon from "@mui/icons-material/Navigation";
+import IconWithText from "./IconWithText";
 
 const Weather = () => {
   const [weather, setWeather] = useState<WeatherHighlights>();
@@ -68,25 +69,25 @@ const Weather = () => {
           type: "Wind Speed",
           unit: units.wind_speed_10m,
           value: currentWeather.wind_speed_10m,
-          icon: AirIcon,
+          icon: <AirIcon />,
         },
         {
           type: "Humidity",
           unit: units.relative_humidity_2m,
           value: currentWeather.relative_humidity_2m,
-          icon: WavesIcon,
+          icon: <WavesIcon />,
         },
         {
           type: "Precipitation",
           unit: units.precipitation,
           value: currentWeather.precipitation,
-          icon: WaterDropIcon,
+          icon: <WaterDropIcon />,
         },
         {
           type: "Wind Direction",
           unit: units.wind_direction_10m,
           value: currentWeather.wind_direction_10m,
-          icon: NavigationIcon,
+          icon: <NavigationIcon />,
         },
       ]);
     } catch (error) {
@@ -139,11 +140,14 @@ const Weather = () => {
                   .description
               }
             </p>
-
-            <p>{JSON.stringify(weatherDetails)}</p>
-            <p>code: {weather.weatherCode}</p>
-            <p>time: {format(weather.time.toUTCString(), "EEEE HH:mm")}</p>
           </div>
+        )}
+        {weatherDetails.length > 0 && (
+          <IconWithText
+            icon={weatherDetails[1].icon}
+            label={weatherDetails[1].type}
+            value={weatherDetails[1].value.toString() + weatherDetails[1].unit}
+          />
         )}
         {error && <p>Error: {error}</p>}
       </div>
