@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import mapping from "./wmoWeatherCodes.json";
 import { format } from "date-fns-tz";
-import { CurrentWeatherType, WeatherDetails, WeatherHighlights } from "./types";
+import {
+  CurrentWeatherType,
+  WeatherDetails,
+  WeatherHighlights,
+  Location,
+} from "./types";
 import WaterDropIcon from "@mui/icons-material/WaterDrop";
 import WavesIcon from "@mui/icons-material/Waves";
 import AirIcon from "@mui/icons-material/Air";
@@ -23,7 +28,6 @@ const Weather = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          //TODO: fix type error
           setLocation(position.coords);
           fetchWeatherData(latitude, longitude);
         },
@@ -46,52 +50,60 @@ const Weather = () => {
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m`
       );
 
-      const currentWeather: CurrentWeatherType = response.data.current;
-      const units = response.data.current_units;
-      console.log(response.data);
-      setWeather({
-        time: new Date(currentWeather.time),
-        temp: currentWeather.temperature_2m,
-        tempUnit: units.temperature_2m,
-        isDay: currentWeather.is_day ? true : false,
-        weatherCode: currentWeather.weather_code,
-        description:
-          mapping[currentWeather.weather_code][
-            currentWeather.is_day ? "day" : "night"
-          ].description,
-        icon: mapping[currentWeather.weather_code][
-          currentWeather.is_day ? "day" : "night"
-        ].icon,
-      });
+      if (response.data) {
+        const currentWeather: CurrentWeatherType = response.data.current;
+        const units = response.data.current_units;
+        const windDirection =
+          response.data.current.wind_direction_10m.toString();
 
-      setWeatherDetails([
-        {
-          type: "Wind Speed",
-          unit: units.wind_speed_10m,
-          value: currentWeather.wind_speed_10m,
-          icon: <AirIcon />,
-        },
-        {
-          type: "Humidity",
-          unit: units.relative_humidity_2m,
-          value: currentWeather.relative_humidity_2m,
-          icon: <WavesIcon />,
-        },
-        {
-          type: "Precipitation",
-          unit: units.precipitation,
-          value: currentWeather.precipitation,
-          icon: <WaterDropIcon />,
-        },
-        {
-          type: "Wind Direction",
-          unit: units.wind_direction_10m,
-          value: currentWeather.wind_direction_10m,
-          icon: <NavigationIcon />,
-        },
-      ]);
+        console.log(response.data);
+        setWeather({
+          time: new Date(currentWeather.time),
+          temp: currentWeather.temperature_2m,
+          tempUnit: units.temperature_2m,
+          isDay: currentWeather.is_day ? true : false,
+          weatherCode: currentWeather.weather_code,
+          description:
+            mapping[currentWeather.weather_code][
+              currentWeather.is_day ? "day" : "night"
+            ].description,
+          icon: mapping[currentWeather.weather_code][
+            currentWeather.is_day ? "day" : "night"
+          ].icon,
+        });
+
+        setWeatherDetails([
+          {
+            type: "Wind Speed",
+            unit: units.wind_speed_10m,
+            value: currentWeather.wind_speed_10m,
+            icon: <AirIcon />,
+          },
+          {
+            type: "Humidity",
+            unit: units.relative_humidity_2m,
+            value: currentWeather.relative_humidity_2m,
+            icon: <WavesIcon />,
+          },
+          {
+            type: "Precipitation",
+            unit: units.precipitation,
+            value: currentWeather.precipitation,
+            icon: <WaterDropIcon />,
+          },
+          {
+            type: "Wind Direction",
+            unit: "°",
+            //TODO: fix issue with correct unit not being returned by API - could be a bug with open meteo
+            //TODO: fix rotation  bug
+
+            value: windDirection,
+            icon: <NavigationIcon className={`rotate-[${windDirection}deg]`} />,
+          },
+        ]);
+      }
     } catch (error) {
-      console.log(`Error calling Open Mateo weather API: ${error}`);
+      console.log(`Error calling Open Meteo weather API: ${error}`);
       setError("Service unavailable at this time. Please try again later.");
     }
   };
@@ -108,7 +120,7 @@ const Weather = () => {
         className="absolute w-full h-full object-cover object-top z-[-2]"
       />
       {/* Current Weather */}
-      <div className="flex flex-col gap-6 p-8 m-w-3xl md:space-x-6">
+      <div className="flex flex-col gap-6 p-12 m-w-3xl md:space-x-6">
         {weather && (
           <div className="flex flex-col">
             <div className="flex flex-row items-center">
@@ -116,16 +128,15 @@ const Weather = () => {
                 src={weather.icon}
                 width={100}
                 height={100}
-                alt="Clear Sky"
-                className=""
+                alt={weather.description}
               />
               <div className="flex flex-row flex-grow font-bold ">
                 <h1 className="text-5xl">{weather.temp}</h1>
                 <h3 className="pl-2 text-xl">{weather.tempUnit}</h3>
               </div>
-              <div className="flex flex-col mr-10">
-                <p className="font-bold">Weather</p>
-                <p className=" text-sm">
+              <div className="flex flex-col mr-10 text-xl">
+                <p className="font-bold text-xl">Weather</p>
+                <p className="text-sm">
                   {format(weather.time.toUTCString(), "EEEE HH:mm")}
                   {/* TODO: fix bug with time not taking into account daylight savings */}
                 </p>
@@ -133,21 +144,18 @@ const Weather = () => {
                 <p className="text-sm">{weather.description}</p>
               </div>
             </div>
-
-            <p>
-              {
-                mapping[weather.weatherCode][weather.isDay ? "day" : "night"]
-                  .description
-              }
-            </p>
           </div>
         )}
         {weatherDetails.length > 0 && (
-          <IconWithText
-            icon={weatherDetails[1].icon}
-            label={weatherDetails[1].type}
-            value={weatherDetails[1].value.toString() + weatherDetails[1].unit}
-          />
+          <ul className="flex flex-col gap-3">
+            {weatherDetails.map((item) => (
+              <IconWithText
+                icon={item.icon}
+                label={item.type}
+                value={item.value.toString() + item.unit}
+              />
+            ))}
+          </ul>
         )}
         {error && <p>Error: {error}</p>}
       </div>
