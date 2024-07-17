@@ -120,42 +120,45 @@ const Weather = () => {
         className="absolute w-full h-full object-cover object-top z-[-2]"
       />
       {/* Current Weather */}
-      <div className="flex flex-col gap-6 p-12 m-w-3xl md:space-x-6">
+      <div className="flex flex-col gap-10 p-12 max-w-3xl mx-auto md:space-x-6">
         {weather && (
           <div className="flex flex-col">
-            <div className="flex flex-row items-center">
-              <Image
-                src={weather.icon}
-                width={100}
-                height={100}
-                alt={weather.description}
-              />
-              <div className="flex flex-row flex-grow font-bold ">
-                <h1 className="text-5xl">{weather.temp}</h1>
-                <h3 className="pl-2 text-xl">{weather.tempUnit}</h3>
+            <div className="flex flex-col-reverse gap-8 sm:flex-row items-center">
+              <div className="flex flex-row items-center flex-grow">
+                <Image
+                  src={weather.icon}
+                  width={100}
+                  height={100}
+                  alt={weather.description}
+                />
+                <div className="flex flex-row font-bold ">
+                  <h1 className="text-5xl">{weather.temp}</h1>
+                  <h3 className="pl-2 text-xl">{weather.tempUnit}</h3>
+                </div>
               </div>
-              <div className="flex flex-col mr-10 text-xl">
-                <p className="font-bold text-xl">Weather</p>
-                <p className="text-sm">
+              <div className="flex flex-col gap-1 text-center sm:text-left">
+                <p className="font-bold text-2xl">Weather</p>
+                <p className="">
                   {format(weather.time.toUTCString(), "EEEE HH:mm")}
                   {/* TODO: fix bug with time not taking into account daylight savings */}
                 </p>
-
-                <p className="text-sm">{weather.description}</p>
+                <p className="">{weather.description}</p>
               </div>
             </div>
           </div>
         )}
         {weatherDetails.length > 0 && (
-          <ul className="flex flex-col gap-3">
-            {weatherDetails.map((item) => (
-              <IconWithText
-                icon={item.icon}
-                label={item.type}
-                value={item.value.toString() + item.unit}
-              />
-            ))}
-          </ul>
+          <div className="flex justify-center sm:justify-start">
+            <ul className="flex flex-col gap-3">
+              {weatherDetails.map((item) => (
+                <IconWithText
+                  icon={item.icon}
+                  label={item.type}
+                  value={item.value.toString() + item.unit}
+                />
+              ))}
+            </ul>
+          </div>
         )}
         {error && <p>Error: {error}</p>}
       </div>
