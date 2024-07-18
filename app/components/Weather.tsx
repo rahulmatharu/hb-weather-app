@@ -118,7 +118,7 @@ const Weather = () => {
         className="absolute w-full h-full object-cover object-top z-[0]"
       />
       {/* Current Weather */}
-      <div className="flex flex-col gap-10 p-12 max-w-3xl mx-auto md:space-x-6 z-50">
+      <div className="flex flex-col flex-grow gap-10 p-12 max-w-3xl mx-auto sm:space-x-6 z-50 border-2">
         {weather && (
           <div className="flex flex-col">
             <div className="flex flex-col-reverse gap-8 sm:flex-row items-center">
@@ -135,8 +135,7 @@ const Weather = () => {
                   <h3 className="pl-2 text-xl">{weather.tempUnit}</h3>
                 </div>
               </div>
-              <div className="flex flex-col gap-1 text-center sm:text-left">
-                <p className="font-bold text-2xl">Weather</p>
+              <div className="flex flex-col gap-1 font-semibold text-center sm:text-left sm:pr-20">
                 <p>
                   {format(weather.time.toUTCString(), "EEEE HH:mm")}
                   {/* TODO: fix bug with time not taking into account daylight savings */}
