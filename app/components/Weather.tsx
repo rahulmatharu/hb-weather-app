@@ -55,8 +55,6 @@ const Weather = () => {
         const units = response.data.current_units;
         const windDirection =
           response.data.current.wind_direction_10m.toString();
-
-        console.log(response.data);
         setWeather({
           time: new Date(currentWeather.time),
           temp: currentWeather.temperature_2m,
@@ -138,11 +136,11 @@ const Weather = () => {
               </div>
               <div className="flex flex-col gap-1 text-center sm:text-left">
                 <p className="font-bold text-2xl">Weather</p>
-                <p className="">
+                <p>
                   {format(weather.time.toUTCString(), "EEEE HH:mm")}
                   {/* TODO: fix bug with time not taking into account daylight savings */}
                 </p>
-                <p className="">{weather.description}</p>
+                <p>{weather.description}</p>
               </div>
             </div>
           </div>
@@ -152,6 +150,7 @@ const Weather = () => {
             <ul className="flex flex-col gap-3">
               {weatherDetails.map((item) => (
                 <IconWithText
+                  key={item.type.replace(/ /g, "_")} // Replaces whitespace with underscore
                   icon={item.icon}
                   label={item.type}
                   value={item.value.toString() + item.unit}

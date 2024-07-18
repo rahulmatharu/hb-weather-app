@@ -1,0 +1,4 @@
+
+Add more logging
+Add a loading spinner
+Update weather icons
