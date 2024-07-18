@@ -55,19 +55,19 @@ const Weather = () => {
         const units = response.data.current_units;
         const windDirection =
           response.data.current.wind_direction_10m.toString();
+        const wmoData =
+          mapping[currentWeather.weather_code][
+            currentWeather.is_day ? "day" : "night"
+          ];
         setWeather({
           time: new Date(currentWeather.time),
           temp: currentWeather.temperature_2m,
           tempUnit: units.temperature_2m,
           isDay: currentWeather.is_day ? true : false,
           weatherCode: currentWeather.weather_code,
-          description:
-            mapping[currentWeather.weather_code][
-              currentWeather.is_day ? "day" : "night"
-            ].description,
-          icon: mapping[currentWeather.weather_code][
-            currentWeather.is_day ? "day" : "night"
-          ].icon,
+          description: wmoData.description,
+          icon: wmoData.icon,
+          image: wmoData.image,
         });
 
         setWeatherDetails([
@@ -111,12 +111,14 @@ const Weather = () => {
       {/* Overlay */}
       <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 z-10" />
       {/* Background */}
-      <Image
-        src="/clear-sky.avif"
-        alt="Clear Sky"
-        fill
-        className="absolute w-full h-full object-cover object-top z-[0]"
-      />
+      {weather && weather.image && (
+        <Image
+          src={weather.image}
+          alt="Clear Sky"
+          fill
+          className="absolute w-full h-full object-cover object-top z-[0]"
+        />
+      )}
       {/* Current Weather */}
       <div className="flex flex-col flex-grow gap-10 p-12 max-w-3xl mx-auto sm:space-x-6 z-50">
         {weather && (

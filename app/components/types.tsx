@@ -38,6 +38,7 @@ export type WeatherHighlights = {
   weatherCode: WeatherCodes;
   description: string;
   icon: string;
+  image: string;
 };
 
 export type WeatherDetails = {
