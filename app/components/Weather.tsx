@@ -118,7 +118,7 @@ const Weather = () => {
         className="absolute w-full h-full object-cover object-top z-[0]"
       />
       {/* Current Weather */}
-      <div className="flex flex-col flex-grow gap-10 p-12 max-w-3xl mx-auto sm:space-x-6 z-50 border-2">
+      <div className="flex flex-col flex-grow gap-10 p-12 max-w-3xl mx-auto sm:space-x-6 z-50">
         {weather && (
           <div className="flex flex-col">
             <div className="flex flex-col-reverse gap-8 sm:flex-row items-center">
