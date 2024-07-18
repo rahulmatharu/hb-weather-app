@@ -107,18 +107,18 @@ const Weather = () => {
   };
 
   return (
-    <div>
+    <div className="flex absolute w-screen h-screen">
       {/* Overlay */}
-      <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 z-[-1]" />
+      <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/40 z-10" />
       {/* Background */}
       <Image
         src="/clear-sky.avif"
         alt="Clear Sky"
-        layout="fill"
-        className="absolute w-full h-full object-cover object-top z-[-2]"
+        fill
+        className="absolute w-full h-full object-cover object-top z-[0]"
       />
       {/* Current Weather */}
-      <div className="flex flex-col gap-10 p-12 max-w-3xl mx-auto md:space-x-6">
+      <div className="flex flex-col gap-10 p-12 max-w-3xl mx-auto md:space-x-6 z-50">
         {weather && (
           <div className="flex flex-col">
             <div className="flex flex-col-reverse gap-8 sm:flex-row items-center">
@@ -128,6 +128,7 @@ const Weather = () => {
                   width={100}
                   height={100}
                   alt={weather.description}
+                  priority={true}
                 />
                 <div className="flex flex-row font-bold ">
                   <h1 className="text-5xl">{weather.temp}</h1>
@@ -164,7 +165,7 @@ const Weather = () => {
 
       {/* Location Coordinates */}
       {location && (
-        <div className="fixed bottom-0 right-0 mr-2 text-sm text-gray-300">
+        <div className="fixed bottom-0 right-0 mr-2 text-sm text-gray-300 z-10">
           Lat: {location.latitude.toFixed(6)}, Long:{" "}
           {location.longitude.toFixed(6)}
         </div>
