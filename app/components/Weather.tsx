@@ -22,6 +22,9 @@ const Weather = () => {
   const [weatherDetails, setWeatherDetails] = useState<WeatherDetails[]>([]);
   const [error, setError] = useState<string>();
   const [location, setLocation] = useState<Location>();
+  const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+
+  console.log(encodeURIComponent(timeZone));
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -47,7 +50,9 @@ const Weather = () => {
   const fetchWeatherData = async (lat: number, long: number) => {
     try {
       const response = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${long}&current=temperature_2m,relative_humidity_2m,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m&timezone=${encodeURIComponent(
+          timeZone
+        )}`
       );
 
       if (response.data) {
@@ -138,10 +143,7 @@ const Weather = () => {
                 </div>
               </div>
               <div className="flex flex-col gap-1 font-semibold text-center sm:text-left sm:pr-20">
-                <p>
-                  {format(weather.time.toUTCString(), "EEEE HH:mm")}
-                  {/* TODO: fix bug with time not taking into account daylight savings */}
-                </p>
+                <p>{format(weather.time, "EEEE HH:mm")}</p>
                 <p>{weather.description}</p>
               </div>
             </div>
